@@ -205,3 +205,62 @@ Decision: Not pursuing WebCodecs for now. If sub-100ms latency is ever required,
 2. Evaluate latency with real camera
 3. If ~150-200ms is acceptable, proceed with robot hardware
 4. If sub-100ms needed in future, consider native app approach
+
+---
+
+## Session 5 (2026-03-01)
+
+**Focus:** Repository consolidation and landing page
+
+### Summary
+
+Merged the 2026 work with the original coinop-logan/drivemyrobots repo to preserve full commit history. Reorganized repo structure to support multiple bots. Created a public landing page.
+
+### Repository Work
+
+**History Merge:**
+- Forked original coinop-logan/drivemyrobots to hexrelay/drivemyrobots
+- Rebased 2026 work on top of original 2018-2019 history
+- Full commit history now preserved in single repo
+
+**Structure Reorganization:**
+- Deleted old structure (bot/, web/, dev/, archive/)
+- New structure:
+  - `bots/common/` — shared bot code (drive_from_remote_input_template.py)
+  - `bots/bankbot/` — first robot (driver.py, setraw.py, drive_from_remote_input.py)
+  - `bots/latency-test/` — synthetic video test (color-stream.py, basketball.png)
+  - `relay/` — relay server scripts
+  - `frontend/` — Elm frontend for bot control
+  - `landing/` — public landing page
+  - `research/` — documentation
+
+**HTTPS Setup:**
+- Installed certbot on dmr-relay server
+- Configured nginx with SSL for drivemyrobots.com
+- HTTP auto-redirects to HTTPS
+
+### Landing Page
+
+Created Elm landing page at drivemyrobots.com root:
+- Moved test prototype to /test endpoint
+- Hero text describes the "room full of robots" vision
+- Status section with progress checklist
+- Architecture overview
+- Links to GitHub and test page
+- Footer credits Logan Brutsche and HexRelay
+
+### Language Decision
+
+Discussed Python vs Rust for bot code. Rust recommended for type safety, especially since the robot (Claude) writes the code and can catch errors at compile time.
+
+### Current State
+
+- drivemyrobots.com shows public landing page
+- drivemyrobots.com/test has working bouncing ball prototype
+- Full repo history preserved at hexrelay/drivemyrobots
+- HTTPS working
+
+### Next Steps
+
+1. When camera hardware arrives, implement real video streaming
+2. Consider rewriting bot code in Rust for type safety
