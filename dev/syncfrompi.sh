@@ -1,1 +1,0 @@
-rsync --exclude __pycache__ -a pi@10.15.15.181:~/scripts/ bot/bankbot/scripts

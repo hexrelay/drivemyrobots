@@ -1,1 +1,0 @@
-rsync -e "ssh -i ~/priv/panther.pem" --exclude __pycache__ -a web/backend/scripts ubuntu@ec2-54-221-147-200.compute-1.amazonaws.com:~/
