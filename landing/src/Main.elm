@@ -70,9 +70,10 @@ heroSection =
         , Font.color (rgb255 203 213 225)
         , spacing 8
         ]
-        [ text "Control robots from anywhere in the world through your web browser. "
-        , text "Low-latency video streaming lets you see what the robot sees, "
-        , text "while keyboard controls give you real-time command."
+        [ text "This is an in-development project working toward the following dream: "
+        , text "a room full of robots, which Internet denizens can remotely log in to and drive around, each with their own camera. "
+        , text "It'll be like a videogame in interface, but the game takes place in real life, in some garage somewhere. "
+        , text "You, dear user, get a weird new game to play; and I get a bizarre set of new pets that will likely try to break out of any container I put them in."
         ]
 
 

@@ -11162,9 +11162,10 @@ var $author$project$Main$heroSection = A2(
 		]),
 	_List_fromArray(
 		[
-			$mdgriffith$elm_ui$Element$text('Control robots from anywhere in the world through your web browser. '),
-			$mdgriffith$elm_ui$Element$text('Low-latency video streaming lets you see what the robot sees, '),
-			$mdgriffith$elm_ui$Element$text('while keyboard controls give you real-time command.')
+			$mdgriffith$elm_ui$Element$text('This is an in-development project working toward the following dream: '),
+			$mdgriffith$elm_ui$Element$text('a room full of robots, which Internet denizens can remotely log in to and drive around, each with their own camera. '),
+			$mdgriffith$elm_ui$Element$text('It\'ll be like a videogame in interface, but the game takes place in real life, in some garage somewhere. '),
+			$mdgriffith$elm_ui$Element$text('You, dear user, get a weird new game to play; and I get a bizarre set of new pets that will likely try to break out of any container I put them in.')
 		]));
 var $elm$html$Html$Attributes$href = function (url) {
 	return A2(
