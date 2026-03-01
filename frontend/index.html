@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drive My Robots</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            color: #00d4ff;
+            margin-bottom: 5px;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .video-container {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        #video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.7);
+        }
+
+        .video-overlay.error {
+            background: rgba(100, 0, 0, 0.8);
+        }
+
+        .connect-btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            background: #00d4ff;
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s, background 0.2s;
+        }
+
+        .connect-btn:hover {
+            background: #00b8e6;
+            transform: scale(1.05);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #333;
+            border-top-color: #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .controls {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .instructions {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #aaa;
+        }
+
+        .color-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .color-btn {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #333;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 0 0 3px #000, 0 0 5px #000;
+            transition: transform 0.1s, border-color 0.2s;
+            -webkit-appearance: none;
+            appearance: none;
+            padding: 0;
+        }
+
+        .color-btn:active {
+            transform: scale(0.95);
+        }
+
+        .color-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .color-btn.selected {
+            border-color: #00d4ff;
+            box-shadow: 0 0 10px #00d4ff;
+        }
+
+        .status {
+            text-align: center;
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .status-connected { color: #0f0; }
+        .status-connecting { color: #ff0; }
+        .status-disconnected { color: #888; }
+        .status-error { color: #f00; }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script src="elm.js"></script>
+    <script>
+        // MediaMTX WebRTC connection
+        const STREAM_URL = 'http://198.199.80.228:8889/robot1/';
+
+        // Initialize Elm
+        const app = Elm.Main.init({
+            node: document.getElementById('app'),
+            flags: {
+                streamUrl: STREAM_URL
+            }
+        });
+
+        let pc = null; // RTCPeerConnection
+        let dataChannel = null;
+
+        // Port: Connect to WebRTC stream
+        app.ports.connectToStream.subscribe(async function(streamUrl) {
+            try {
+                app.ports.streamStatus.send('connecting');
+
+                // Create peer connection
+                pc = new RTCPeerConnection({
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' }
+                    ]
+                });
+
+                // Handle incoming tracks
+                pc.ontrack = function(event) {
+                    console.log('Got track:', event.track.kind);
+                    const video = document.getElementById('video');
+                    if (video) {
+                        video.srcObject = event.streams[0];
+                        video.playsInline = true;
+                        video.muted = true;
+                    }
+
+                    // Set minimum jitter buffer for lowest latency
+                    // This is Chrome-specific but degrades gracefully
+                    const receiver = event.receiver;
+                    if (receiver && 'playoutDelayHint' in receiver) {
+                        receiver.playoutDelayHint = 0;  // Request minimum latency
+                        console.log('Set playoutDelayHint to 0 for', event.track.kind);
+                    } else if (receiver && 'jitterBufferTarget' in receiver) {
+                        receiver.jitterBufferTarget = 0;  // Firefox name
+                        console.log('Set jitterBufferTarget to 0 for', event.track.kind);
+                    }
+                };
+
+                // Handle data channel (for bidirectional communication)
+                pc.ondatachannel = function(event) {
+                    console.log('Got data channel:', event.channel.label);
+                    dataChannel = event.channel;
+                    dataChannel.onmessage = function(e) {
+                        console.log('Data channel message:', e.data);
+                        app.ports.commandAck.send(e.data);
+                    };
+                };
+
+                // Create offer with video receive - request low latency
+                pc.addTransceiver('video', {
+                    direction: 'recvonly',
+                    sendEncodings: [],
+                    streams: []
+                });
+
+                const offer = await pc.createOffer();
+                await pc.setLocalDescription(offer);
+
+                // Wait for ICE gathering
+                await new Promise(resolve => {
+                    if (pc.iceGatheringState === 'complete') {
+                        resolve();
+                    } else {
+                        pc.onicegatheringstatechange = () => {
+                            if (pc.iceGatheringState === 'complete') {
+                                resolve();
+                            }
+                        };
+                    }
+                });
+
+                // Send offer to MediaMTX WHEP endpoint
+                const whepUrl = streamUrl + 'whep';
+                const response = await fetch(whepUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/sdp'
+                    },
+                    body: pc.localDescription.sdp
+                });
+
+                if (!response.ok) {
+                    throw new Error('WHEP request failed: ' + response.status);
+                }
+
+                const answerSdp = await response.text();
+                await pc.setRemoteDescription({
+                    type: 'answer',
+                    sdp: answerSdp
+                });
+
+                pc.onconnectionstatechange = function() {
+                    console.log('Connection state:', pc.connectionState);
+                    if (pc.connectionState === 'connected') {
+                        app.ports.streamStatus.send('connected');
+                    } else if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
+                        app.ports.streamStatus.send('disconnected');
+                    }
+                };
+
+            } catch (error) {
+                console.error('WebRTC error:', error);
+                app.ports.streamStatus.send('Error: ' + error.message);
+            }
+        });
+
+        // Port: Send command to relay server
+        const INPUT_STATE_URL = 'http://198.199.80.228:8080/input_state';
+
+        app.ports.sendCommand.subscribe(async function(command) {
+            console.log('Command received:', JSON.stringify(command));
+
+            try {
+                // Build the payload based on command type
+                let payload = {};
+                if (command.type === 'setColor') {
+                    payload = { 'robot1': { 'color': command.color } };
+                } else if (command.type === 'setDirection') {
+                    payload = { 'robot1': { 'direction': command.direction } };
+                }
+
+                // POST to relay server to update input_state.json
+                const response = await fetch(INPUT_STATE_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Server response:', result);
+                    const ackMsg = command.type === 'setColor' ? command.color : command.direction;
+                    app.ports.commandAck.send('sent: ' + ackMsg);
+                } else {
+                    throw new Error('Server returned ' + response.status);
+                }
+            } catch (error) {
+                console.error('Failed to send command:', error);
+                app.ports.commandAck.send('error: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
