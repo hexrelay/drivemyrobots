@@ -11121,7 +11121,7 @@ var $author$project$Main$footer = A2(
 			A3($mdgriffith$elm_ui$Element$rgb255, 100, 116, 139)),
 			$mdgriffith$elm_ui$Element$centerX
 		]),
-	$mdgriffith$elm_ui$Element$text('A project by Logan'));
+	$mdgriffith$elm_ui$Element$text('A project by Logan Brutsche and his robotic pal HexRelay'));
 var $author$project$Main$header = A2(
 	$mdgriffith$elm_ui$Element$column,
 	_List_fromArray(

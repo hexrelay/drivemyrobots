@@ -209,4 +209,4 @@ footer =
         , Font.color (rgb255 100 116 139)
         , centerX
         ]
-        (text "A project by Logan")
+        (text "A project by Logan Brutsche and his robotic pal HexRelay")
