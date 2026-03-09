@@ -112,7 +112,10 @@ class DedicatedHandler(asyncio.Protocol):
         active_connections.pop(self.bot_id, None)
 
     def data_received(self, data):
-        print(f"Received from bot {self.bot_id}: {data.decode()}")
+        try:
+            print(f"Received from bot {self.bot_id}: {data.decode()}")
+        except UnicodeDecodeError:
+            print(f"Received non-UTF8 data from bot {self.bot_id}: {data!r}")
 
 
 class HTTPHandler(BaseHTTPRequestHandler):
