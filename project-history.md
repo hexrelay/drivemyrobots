@@ -264,3 +264,59 @@ Discussed Python vs Rust for bot code. Rust recommended for type safety, especia
 
 1. When camera hardware arrives, implement real video streaming
 2. Consider rewriting bot code in Rust for type safety
+
+---
+
+## Session 6 (2026-03-09)
+
+**Focus:** Real video streaming and LED control
+
+### Summary
+
+Hardware arrived. Set up real camera streaming with hardware H.264 encoding and integrated Blinkt LED control. The LED Feedback Prototype milestone is now complete.
+
+### Video Streaming Pipeline
+
+Built a GStreamer pipeline using hardware encoding:
+
+```
+Pi Camera → libcamerasrc → v4l2h264enc (hardware) → RTSP → MediaMTX → WHEP → Browser
+```
+
+Key components:
+- **libcamerasrc**: GStreamer source for Pi Camera Module 3
+- **v4l2h264enc**: Hardware H.264 encoder using Pi 4's VideoCore GPU
+- **rtspclientsink**: Pushes RTSP stream to MediaMTX relay
+- **MediaMTX**: Converts RTSP to WHEP for browser WebRTC playback
+
+### LED Control
+
+Created `pi-scripts/led-control.py`:
+- Connects to relay server via persistent TCP connection
+- Receives color commands from browser via relay push
+- Sets all 8 Blinkt LEDs to the commanded color
+- Runs as separate process from video streaming
+
+### Infrastructure Updates
+
+- Added nginx proxy at `/api/input_state` for HTTPS (fixes mixed content errors)
+- Frontend updated to use HTTPS endpoints for both video and commands
+- Documented full setup in `streaming-setup.md`
+
+### Artifacts Created
+
+- `pi-scripts/led-control.py` — LED control script for Blinkt
+- `streaming-setup.md` — Complete streaming setup documentation
+
+### Current State
+
+- Real camera video streaming working at drivemyrobots.com/test/
+- LED colors controllable from browser (click buttons or press 1-8)
+- Full round-trip working: Browser → Relay → Pi → LEDs → Camera → Browser
+- LED Feedback Prototype milestone complete
+
+### Next Steps
+
+1. Measure actual round-trip latency with camera + LEDs
+2. Add motor control for actual robot movement
+3. Consider Rust rewrite for bot code

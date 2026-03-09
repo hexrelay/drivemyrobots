@@ -170,8 +170,8 @@
 
     <script src="elm.js"></script>
     <script>
-        // MediaMTX WebRTC connection
-        const STREAM_URL = 'http://198.199.80.228:8889/robot1/';
+        // MediaMTX via HTTPS proxy
+        const STREAM_URL = 'https://drivemyrobots.com/robot1/';
 
         // Initialize Elm
         const app = Elm.Main.init({
@@ -251,7 +251,7 @@
                     }
                 });
 
-                // Send offer to MediaMTX WHEP endpoint
+                // Send offer to pi-webrtc WHEP endpoint
                 const whepUrl = streamUrl + 'whep';
                 const response = await fetch(whepUrl, {
                     method: 'POST',
