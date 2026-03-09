@@ -14,18 +14,24 @@ import blinkt
 SERVER_IP = "198.199.80.228"
 GREETING_PORT = 4546
 BOT_ID = "robot1"
+NUM_LEDS = 8
 
 # Initialize Blinkt
 blinkt.set_clear_on_exit(True)
 blinkt.set_brightness(0.5)
 
+# State
+current_position = 0
+current_color = (255, 255, 255)  # Default white
 
-def all_leds_color(r, g, b):
-    """Set all LEDs to the same color."""
-    for i in range(8):
-        blinkt.set_pixel(i, r, g, b)
+
+def update_led_display():
+    """Update LEDs to show single lit LED at current position."""
+    blinkt.clear()
+    r, g, b = current_color
+    blinkt.set_pixel(current_position, r, g, b)
     blinkt.show()
-    print(f"All LEDs set to RGB({r}, {g}, {b})")
+    print(f"LED {current_position} set to RGB{current_color}")
 
 
 def clear_all_leds():
@@ -50,21 +56,35 @@ class InputClient(asyncio.Protocol):
         self.transport = None
 
     def connection_made(self, transport):
+        global current_position, current_color
         self.transport = transport
         print("Connected to relay server")
-        # Flash green to indicate connection
-        all_leds_color(0, 255, 0)
-        self.loop.call_later(0.5, clear_all_leds)
+        # Show initial LED at position 0
+        current_position = 0
+        current_color = (0, 255, 0)  # Green on connect
+        update_led_display()
 
     def data_received(self, data):
+        global current_position, current_color
         try:
             input_state = json.loads(data.decode())
             print(f"Received: {input_state}")
 
-            # Handle color from frontend (hex color like '#ff0000')
+            # Handle color change
             if 'color' in input_state:
                 r, g, b = hex_to_rgb(input_state['color'])
-                all_leds_color(r, g, b)
+                current_color = (r, g, b)
+                update_led_display()
+
+            # Handle direction for moving LED position
+            if 'direction' in input_state:
+                direction = input_state['direction']
+                if direction == 'left' and current_position > 0:
+                    current_position -= 1
+                    update_led_display()
+                elif direction == 'right' and current_position < NUM_LEDS - 1:
+                    current_position += 1
+                    update_led_display()
 
             # Handle clear command
             if input_state.get('clear'):
