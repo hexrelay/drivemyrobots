@@ -275,9 +275,48 @@ For users who truly need sub-100ms latency, a dedicated native app (like Parsec/
 
 This is a larger undertaking but avoids the browser compatibility issues while delivering better results.
 
+## WebCodecs Experiment Results (2026-03-10)
+
+**We built and tested the WebCodecs + WebTransport approach.**
+
+### What We Built
+
+- **rtsp2browser proxy** (Rust): Connects to MediaMTX RTSP, forwards RTP packets over WebTransport datagrams
+- **Browser client**: WebTransport + WebCodecs VideoDecoder + Canvas rendering
+- Handles H.264 NAL unit parsing, FU-A defragmentation, avcC format conversion
+- Custom datagram fragmentation for large keyframes (~50KB)
+
+### Technical Challenges Solved
+
+1. Consecutive UDP port allocation for RTSP compliance
+2. IPv6 dual-stack socket binding
+3. WebTransport datagram size limits (~1200 bytes)
+4. H.264 avcC vs Annex-B format conversion
+5. Frame boundary detection without AUD NAL units
+
+### Result: No Visible Latency Improvement
+
+Despite bypassing the WebRTC jitter buffer entirely, **there was no perceptible difference in latency** compared to the standard WebRTC/WHEP player.
+
+### Possible Explanations
+
+1. **Network latency dominates**: The Pi-to-relay-to-browser path adds ~100-150ms regardless of decode pipeline
+2. **Hardware encoding latency**: The Pi's v4l2h264enc may buffer frames
+3. **Our implementation overhead**: Custom parsing/reassembly may negate gains
+4. **WebRTC jitter buffer isn't the bottleneck**: Modern browsers may be smarter than assumed
+
+### Conclusion
+
+The browser jitter buffer theory was incorrect, or its impact is smaller than other pipeline components. The standard WebRTC/WHEP approach is simpler and performs equally well.
+
+**Code preserved at tag:** `webcodecs-experiment-2026-03-10`
+
+---
+
 ## Next Steps
 
 1. ~~Implement playoutDelayHint = 0~~ Done
-2. When camera arrives, implement pi-webrtc with hardware encoding
-3. Evaluate latency with real camera - if ~150-200ms is acceptable, stop there
-4. If sub-100ms needed in future: consider native app rather than WebCodecs
+2. ~~WebCodecs experiment~~ Done - no improvement
+3. ~~When camera arrives, implement hardware encoding~~ Done (v4l2h264enc)
+4. Current latency (~200ms) is acceptable for teleoperation
+5. If sub-100ms needed in future: consider native app rather than browser optimizations
