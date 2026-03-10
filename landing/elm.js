@@ -11491,9 +11491,9 @@ var $author$project$Main$statusSection = A2(
 				]),
 			_List_fromArray(
 				[
-					$mdgriffith$elm_ui$Element$text('The project is in active development. A working prototype validates '),
-					$mdgriffith$elm_ui$Element$text('the full pipeline using synthetic video (a bouncing basketball you can control). '),
-					$mdgriffith$elm_ui$Element$text('Hardware is on order for the first camera-equipped test.')
+					$mdgriffith$elm_ui$Element$text('The project is in active development. The first milestone is complete: '),
+					$mdgriffith$elm_ui$Element$text('real-time video streaming from a Raspberry Pi camera with LED control feedback. '),
+					$mdgriffith$elm_ui$Element$text('Next up: building a more interesting robot to drive around.')
 				])),
 			A2(
 			$mdgriffith$elm_ui$Element$column,
@@ -11507,8 +11507,9 @@ var $author$project$Main$statusSection = A2(
 					A2($author$project$Main$statusItem, true, 'WebRTC video streaming via MediaMTX'),
 					A2($author$project$Main$statusItem, true, 'Elm browser frontend with keyboard controls'),
 					A2($author$project$Main$statusItem, true, 'Persistent TCP connections for low-latency input'),
-					A2($author$project$Main$statusItem, true, '~200-300ms end-to-end latency achieved'),
-					A2($author$project$Main$statusItem, false, 'Real camera integration (hardware pending)'),
+					A2($author$project$Main$statusItem, true, '~200ms end-to-end latency achieved'),
+					A2($author$project$Main$statusItem, true, 'Real camera with hardware H.264 encoding'),
+					A2($author$project$Main$statusItem, true, 'LED feedback loop working'),
 					A2($author$project$Main$statusItem, false, 'Motor control on physical robot')
 				]))
 		]));

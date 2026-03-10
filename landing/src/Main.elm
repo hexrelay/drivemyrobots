@@ -93,16 +93,17 @@ statusSection =
             ]
             (text "Current Status")
         , paragraph [ Font.color (rgb255 203 213 225) ]
-            [ text "The project is in active development. A working prototype validates "
-            , text "the full pipeline using synthetic video (a bouncing basketball you can control). "
-            , text "Hardware is on order for the first camera-equipped test."
+            [ text "The project is in active development. The first milestone is complete: "
+            , text "real-time video streaming from a Raspberry Pi camera with LED control feedback. "
+            , text "Next up: building a more interesting robot to drive around."
             ]
         , column [ spacing 8, paddingXY 16 0 ]
             [ statusItem True "WebRTC video streaming via MediaMTX"
             , statusItem True "Elm browser frontend with keyboard controls"
             , statusItem True "Persistent TCP connections for low-latency input"
-            , statusItem True "~200-300ms end-to-end latency achieved"
-            , statusItem False "Real camera integration (hardware pending)"
+            , statusItem True "~200ms end-to-end latency achieved"
+            , statusItem True "Real camera with hardware H.264 encoding"
+            , statusItem True "LED feedback loop working"
             , statusItem False "Motor control on physical robot"
             ]
         ]
