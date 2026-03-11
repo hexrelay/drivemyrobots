@@ -320,3 +320,52 @@ Created `pi-scripts/led-control.py`:
 1. Measure actual round-trip latency with camera + LEDs
 2. Add motor control for actual robot movement
 3. Consider Rust rewrite for bot code
+
+---
+
+## Session 7 (2026-03-10)
+
+**Focus:** WebCodecs latency experiment and project cleanup
+
+### Summary
+
+Attempted to reduce video latency by bypassing the browser's WebRTC jitter buffer using WebCodecs + WebTransport. Built a complete working implementation but found no perceptible latency improvement. Concluded that the jitter buffer isn't the bottleneck - network latency and encoder buffering likely dominate.
+
+With the first milestone (LED Feedback Prototype) solidly complete, cleaned up the codebase and updated documentation.
+
+### WebCodecs Experiment
+
+Built and deployed:
+- **rtsp2browser proxy** (Rust): Connects to MediaMTX RTSP, extracts H.264 NAL units, forwards over WebTransport/QUIC datagrams
+- **Browser client**: WebTransport + WebCodecs VideoDecoder + Canvas rendering
+- Solved: consecutive UDP port allocation, IPv6 dual-stack sockets, datagram fragmentation for large keyframes, H.264 avcC format conversion
+
+**Result:** No visible latency difference vs standard WebRTC. Theory that browser jitter buffer was the bottleneck appears incorrect.
+
+Code preserved at tag `webcodecs-experiment-2026-03-10` on branch `experimental/webcodecs`.
+
+### Project Cleanup
+
+- Updated landing page: marked camera and LED feedback as complete
+- Archived unused code (`bots/bankbot/`, `bots/latency-test/`) to `archive/`
+- Removed duplicate `latency-approaches.md` from root (kept `research/` version)
+- Added common operations to `CLAUDE.md` (Pi SSH, stream restart commands)
+- Documented experiment findings in `research/latency-approaches.md`
+
+### Pi Access Note
+
+Temporary SSH access documented in CLAUDE.md:
+- Host: 174.31.80.238, Port: 24, User: pi, Key: ~/.ssh/pi_dmr
+- Valid until 2026-03-15
+
+### Current State
+
+- First milestone complete: real camera streaming + LED control loop
+- ~200ms end-to-end latency (acceptable for teleoperation)
+- Landing page updated to reflect completed status
+- Codebase cleaned up and well-documented
+
+### Next Steps
+
+1. Build a more interesting physical robot (manager's next focus)
+2. Add motor control when robot hardware is ready
